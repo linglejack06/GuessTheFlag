@@ -11,7 +11,13 @@ struct ContentView: View {
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
     @State private var showingScore = false
+    @State private var showingFinished = false;
     @State private var scoreTitle = ""
+    @State private var score = 0;
+    @State private var roundsPlayed = 0;
+    var finishedString: String {
+        "You finished with \(score) out of 8 possible points)"
+    }
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -48,7 +54,7 @@ struct ContentView: View {
                 .clipShape(.rect(cornerRadius: 20))
                 Spacer()
                 Spacer()
-                Text("Score: ???")
+                Text("Score: \(score)")
                     .foregroundStyle(.white)
                     .font(.title.bold())
                 Spacer()
@@ -58,16 +64,31 @@ struct ContentView: View {
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: askQuestion)
         } message: {
-            Text("Your score is ???")
+            Text("Your score is \(score)")
         }
+        .alert(finishedString, isPresented: $showingFinished) {
+            Button("Play Again", action: resetGame)
+        }
+    }
+    func resetGame() {
+        score = 0;
+        roundsPlayed = 0;
+        askQuestion()
     }
     func flagTapped(_ number: Int) {
         if number == correctAnswer {
             scoreTitle = "Correct"
+            score += 1
         } else {
-            scoreTitle = "Wrong"
+            scoreTitle = "Wrong, you chose the flag of \(countries[number])"
+            score -= 1
         }
-        showingScore = true
+        roundsPlayed += 1
+        if(roundsPlayed >= 8) {
+            showingFinished = true
+        } else {
+            showingScore = true
+        }
     }
     func askQuestion() {
         countries.shuffle()
