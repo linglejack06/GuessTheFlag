@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var scoreTitle = ""
     @State private var score = 0;
     @State private var roundsPlayed = 0;
+    @State private var flagTappedIndex = -1;
     var finishedString: String {
         "You finished with \(score) out of 8 possible points)"
     }
@@ -45,6 +46,11 @@ struct ContentView: View {
                             Image(countries[number])
                                 .clipShape(.capsule)
                                 .shadow(radius: 5)
+                                .rotation3DEffect(
+                                    .degrees(flagTappedIndex == number ? 360 : 0),
+                                    axis: (x: 0, y: 1, z: 0)
+                                )
+                                .opacity((flagTappedIndex != -1 && flagTappedIndex != number) ? 0.25 : 1)
                         }
                     }
                 }
@@ -84,14 +90,19 @@ struct ContentView: View {
             score -= 1
         }
         roundsPlayed += 1
-        if(roundsPlayed >= 8) {
-            showingFinished = true
-        } else {
-            showingScore = true
+        withAnimation {
+            flagTappedIndex = number
+        } completion: {
+            if(roundsPlayed >= 8) {
+                showingFinished = true
+            } else {
+                showingScore = true
+            }
         }
     }
     func askQuestion() {
         countries.shuffle()
+        flagTappedIndex = -1
         correctAnswer = Int.random(in: 0...2)
     }
 }
